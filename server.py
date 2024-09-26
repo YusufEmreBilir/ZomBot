@@ -1,10 +1,8 @@
 import subprocess
 import threading
 import os
-import sys
 from time import sleep
 import socket
-from uu import encode
 import re
 
 
@@ -22,19 +20,33 @@ sleep(3)
 
 
 start_server_path = 'C:\\SteamCMD\\steamapps\\common\\Project Zomboid Dedicated Server\\StartServer64.bat'
+start_server_name = 'StartServer64.bat'
 server_on_log = 'Zomboid Server is VAC Secure'
 server_off_log = 'Shutting down Steam Game Server'
 server_process = None
 
 def start_server():
     global server_process, connection, address
-    server_process = subprocess.Popen(
-        [start_server_path],
-        stdin=subprocess.PIPE,
-        stdout=subprocess.PIPE,
-        stderr=subprocess.PIPE,
-        text=True
-    )
+    try:
+        try:
+            server_process = subprocess.Popen(
+                [start_server_name],
+                stdin=subprocess.PIPE,
+                stdout=subprocess.PIPE,
+                stderr=subprocess.PIPE,
+                text=True
+            )
+        except FileNotFoundError:
+            server_process = subprocess.Popen(
+                [start_server_path],
+                stdin=subprocess.PIPE,
+                stdout=subprocess.PIPE,
+                stderr=subprocess.PIPE,
+                text=True
+            )
+    except FileNotFoundError:
+        print('\033[91mHATA: Server bulunamadi\033[0m')
+        exit()
 
 
 
