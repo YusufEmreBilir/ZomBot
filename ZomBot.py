@@ -18,7 +18,7 @@ server_status_sent = True
 
 subprocess.Popen(['start', 'cmd', '/k', 'python', 'server.py'], shell=True)
 
-# İstemci tarafında bir soket oluşturuluyor
+# İstemci tarantula bir soket oluşturuluyor
 client_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 client_socket.connect((socket.gethostname(), 12345))  # Sunucuya bağlanmak için IP ve port tanımlanıyor
 print('Sunucu ile baglanti kuruldu!')
