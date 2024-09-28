@@ -5,6 +5,10 @@ from time import sleep
 import socket
 import re
 
+from Tools.pynche.StripViewer import constant
+
+server_loading = False
+output_count = 0
 
 os.system('cls')
 
@@ -21,6 +25,7 @@ sleep(3)
 
 start_server_path = 'C:\\SteamCMD\\steamapps\\common\\Project Zomboid Dedicated Server\\StartServer64.bat'
 start_server_name = 'StartServer64.bat'
+server_load_start_log = '' #TBD
 server_on_log = 'Zomboid Server is VAC Secure'
 server_off_log = 'Shutting down Steam Game Server'
 server_process = None
@@ -58,11 +63,16 @@ def send_command(command_to_send):
 
 # Sunucu loglarını ayrı bir thread'de sürekli olarak oku
 def read_output():
-    global connection, address
+    global connection, address, server_loading, output_count
     while True:
         output = server_process.stdout.readline()
 
         if output:
+
+            if server_loading:
+                output_count += 1
+                connection.send(f'output_count ({output_count})'.encode())
+
             print(output.strip())  # Yeni gelen log satırını yazdır
 
             if 'Players connected' in output.strip():
@@ -74,12 +84,20 @@ def read_output():
                 connection.send(f'player_count_data {player_count}'.encode())
 
 
+            elif server_load_start_log in output.strip():
+                connection.send('loading'.encode())
+                print('YUKLEME BASLADI')
+                server_loading = True
+
             elif server_on_log in output.strip():
                 connection.send('1'.encode())
-                print('SERVER START')
+                print('SERVER BASLADI'+ '   ' + output_count)
+                server_loading = False
+                output_count = 0
+
             elif server_off_log in output.strip():
                 connection.send('0'.encode())
-                print('SERVER STOP')
+                print('SERVER KAPANDI')
 
         else:
             pass

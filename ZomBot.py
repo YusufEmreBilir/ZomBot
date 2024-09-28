@@ -8,6 +8,7 @@ import socket
 import asyncio
 import re
 
+
 os.system('cls')
 
 direct_commands_allowed = False
@@ -15,11 +16,15 @@ direct_commands_allowed = False
 server_is_open = 'Offline'
 server_is_open_emoji = ':red_circle:'
 player_count = 66
+output_count = 0
+server_on_output_count = 42 #TBD
 server_status_sent = True
+server_loading = False
+bar_message = None
 
 subprocess.Popen(['start', 'cmd', '/k', 'python', 'server.py'], shell=True)
 
-# İstemci tarantula bir soket oluşturuluyor
+
 client_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 client_socket.connect((socket.gethostname(), 12345))  # Sunucuya bağlanmak için IP ve port tanımlanıyor
 print('\033[32mSunucu ile baglanti kuruldu!\033[0m')
@@ -41,7 +46,7 @@ bot = commands.Bot(command_prefix='!pz ',
 
 @bot.event
 async def on_ready():
-    global server_status_sent
+    global server_status_sent, bar_message
     channel = bot.get_channel(channel_ID)
     print(f'\033[32m*** Discord Botu Uyandi! *** \n{bot.user} adına giris yapildi\033[0m')
     await channel.send('***         Bot Uyandı!***')
@@ -49,32 +54,51 @@ async def on_ready():
     await bot.change_presence(activity=discord.CustomActivity(name=get_server_status_without_emoji()))
 
     while True:
+
         if not server_status_sent:
             await channel.send(get_server_status())
             await bot.change_presence(activity=discord.CustomActivity(name=get_server_status_without_emoji()))
             server_status_sent = True
+            bar_message = None
+
+        if server_loading:
+            if not bar_message:
+                bar_message = await channel.send(loading_bar(output_count*100/server_on_output_count, 20))
+            else:
+                await bar_message.edit(content=loading_bar(output_count*100/server_on_output_count, 20))
+
         await asyncio.sleep(5)
 
 
 def server_feedback():
-    global server_is_open, player_count, server_status_sent
+    global server_is_open, player_count, server_status_sent, server_loading, output_count
     print('LOG-internal: Server ile iletisim basladi')
     while True:
 
         coming_code = client_socket.recv(1024).decode()
 
-        if coming_code == '0':
-            server_is_open = ':Offline'
+        if coming_code == 'loading':
+            server_loading = True
+
+        elif coming_code == '0':
+            server_is_open = 'Offline'
             print('LOG-internal: Server kapanma onayi alindi!, Duyuruluyor...')
             server_status_sent = False
+            server_loading = False
 
         elif coming_code == '1':
             server_is_open = 'Online'
             print('LOG-internal: Server acilma onayi alindi!')
             server_status_sent = False
+            server_loading = False
 
         elif 'player_count_data' in coming_code:
             player_count = int(re.search(r"(\d+)", coming_code).group(1))
+
+        elif 'output_count' in coming_code:
+            search_result = re.search(r"\((\d+)\)", output.strip())
+            if search_result:
+                output_count = int(search_result.group(1))
 
         sleep(1)
 
@@ -94,6 +118,11 @@ def get_server_status_without_emoji():
 
 def update_player_count():
     client_socket.send('players'.encode())
+
+def loading_bar(progress_percent, lenght = 20):
+    completed = int(progress_percent * lenght / 100)
+    bar = '[' + '-'*completed + ' '*(lenght - completed) + ']'
+    return bar
 
 
 
