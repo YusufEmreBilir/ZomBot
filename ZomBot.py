@@ -17,10 +17,10 @@ server_is_open = 'Offline'
 server_is_open_emoji = ':red_circle:'
 player_count = 66
 output_count = 0
-server_on_output_count = 42 #TBD
+server_on_output_count = 842 #TBD
 server_status_sent = True
 server_loading = False
-bar_message = None
+bar_message = ''
 
 subprocess.Popen(['start', 'cmd', '/k', 'python', 'server.py'], shell=True)
 
@@ -55,17 +55,25 @@ async def on_ready():
 
     while True:
 
+        if server_loading:
+            load_percent = output_count*100/server_on_output_count
+            if not bar_message:
+                bar_message = await channel.send(loading_bar(load_percent, 20) + ' %' + str(load_percent))
+            else:
+                await bar_message.edit(content=loading_bar(load_percent, 20) + ' %' + str(load_percent))
+        elif bar_message != '':
+            try:
+                await bar_message.delete()
+            except:
+                pass
+
         if not server_status_sent:
             await channel.send(get_server_status())
             await bot.change_presence(activity=discord.CustomActivity(name=get_server_status_without_emoji()))
             server_status_sent = True
-            bar_message = None
+            bar_message = ''
 
-        if server_loading:
-            if not bar_message:
-                bar_message = await channel.send(loading_bar(output_count*100/server_on_output_count, 20))
-            else:
-                await bar_message.edit(content=loading_bar(output_count*100/server_on_output_count, 20))
+
 
         await asyncio.sleep(5)
 
@@ -77,10 +85,8 @@ def server_feedback():
 
         coming_code = client_socket.recv(1024).decode()
 
-        if coming_code == 'loading':
-            server_loading = True
 
-        elif coming_code == '0':
+        if coming_code == '0':
             server_is_open = 'Offline'
             print('LOG-internal: Server kapanma onayi alindi!, Duyuruluyor...')
             server_status_sent = False
@@ -89,14 +95,18 @@ def server_feedback():
         elif coming_code == '1':
             server_is_open = 'Online'
             print('LOG-internal: Server acilma onayi alindi!')
+
             server_status_sent = False
             server_loading = False
+
+        elif coming_code == 'loading':
+            server_loading = True
 
         elif 'player_count_data' in coming_code:
             player_count = int(re.search(r"(\d+)", coming_code).group(1))
 
         elif 'output_count' in coming_code:
-            search_result = re.search(r"\((\d+)\)", output.strip())
+            search_result = re.search(r"\((\d+)\)", coming_code)
             if search_result:
                 output_count = int(search_result.group(1))
 
@@ -121,7 +131,7 @@ def update_player_count():
 
 def loading_bar(progress_percent, lenght = 20):
     completed = int(progress_percent * lenght / 100)
-    bar = '[' + '-'*completed + ' '*(lenght - completed) + ']'
+    bar = '[' + '/'*completed + '-'*(lenght - completed) + ']'
     return bar
 
 

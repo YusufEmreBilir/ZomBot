@@ -5,7 +5,6 @@ from time import sleep
 import socket
 import re
 
-from Tools.pynche.StripViewer import constant
 
 server_loading = False
 output_count = 0
@@ -25,7 +24,7 @@ sleep(3)
 
 start_server_path = 'C:\\SteamCMD\\steamapps\\common\\Project Zomboid Dedicated Server\\StartServer64.bat'
 start_server_name = 'StartServer64.bat'
-server_load_start_log = '' #TBD
+server_load_start_log = 'LoggerManager.init                  > Initializing...' #TBD
 server_on_log = 'Zomboid Server is VAC Secure'
 server_off_log = 'Shutting down Steam Game Server'
 server_process = None
@@ -90,8 +89,9 @@ def read_output():
                 server_loading = True
 
             elif server_on_log in output.strip():
+                sleep(1.5)
                 connection.send('1'.encode())
-                print('SERVER BASLADI'+ '   ' + output_count)
+                print(f'SERVER BASLADI {output_count}')
                 server_loading = False
                 output_count = 0
 
