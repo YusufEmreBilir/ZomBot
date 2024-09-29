@@ -179,6 +179,7 @@ async def on_message(message):
         elif direct_commands_allowed:
             client_socket.send(discord_input.encode())
             print(f'LOG-action: Direkt komutlar etkin, {discord_input} komutu direkt olarak sunucuya gonderildi.')
+            await message.channel.send(f'Direkt komut girdiniz: {discord_input}')
         else:
             await message.channel.send('Geçersiz komut.')
             print('LOG-action: Gecersiz komut reddedildi.')

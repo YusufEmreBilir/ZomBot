@@ -25,8 +25,9 @@ sleep(3)
 start_server_path = 'C:\\SteamCMD\\steamapps\\common\\Project Zomboid Dedicated Server\\StartServer64.bat'
 start_server_name = 'StartServer64.bat'
 server_load_start_log = 'LoggerManager.init                  > Initializing...' #TBD
-server_on_log = 'Zomboid Server is VAC Secure'
+server_on_log = '*** SERVER STARTED ****'
 server_off_log = 'Shutting down Steam Game Server'
+loading_asset_log = 'LOADING ASSETS: START'
 server_process = None
 
 def start_server():
