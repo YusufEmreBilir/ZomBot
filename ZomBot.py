@@ -7,6 +7,7 @@ import threading
 import socket
 import asyncio
 import re
+import configparser
 
 
 os.system('cls')
@@ -17,10 +18,11 @@ server_is_open = 'Offline'
 server_is_open_emoji = ':red_circle:'
 player_count = 66
 output_count = 0
-server_on_output_count = 842 #TBD
+server_on_output_count = 8420 #TBD
 server_status_sent = True
 server_loading = False
 bar_message = ''
+config = configparser.ConfigParser()
 
 subprocess.Popen(['start', 'cmd', '/k', 'python', 'server.py'], shell=True)
 
@@ -35,6 +37,7 @@ command = ''
 discord_input = ''
 
 token = 'MTI4NTUzMTEyOTkzOTQ5NzAxMQ.GW3Hf9.8nIk1dl6sElo3zhByrE8E9F8TnEucMMDC-Okcw'
+config_path = 'C:\\Users\\Yusuf Emre Bilir\\Zomboid\\Server\\servertest.ini'
 channel_ID = 1201982960333770822
 intents = discord.Intents.default()
 intents.message_content = True
@@ -138,7 +141,7 @@ def loading_bar(progress_percent, lenght = 20):
 
 @bot.event
 async def on_message(message):
-    global discord_input, server_is_open, direct_commands_allowed
+    global discord_input, server_is_open, direct_commands_allowed, config_path
     if message.author == bot.user:
         return
 
@@ -154,9 +157,9 @@ async def on_message(message):
             print('LOG-action: Server durumu gönderiliyor.')
             await message.channel.send(get_server_status())
 
-        elif 'Offline' in get_server_status():
-            await message.channel.send(f'Server açık olmadığı için {discord_input} isteğiniz reddedildi.')
-            print(f'LOG-action: Server acik olmadigi icin {discord_input} istegi reddedildi.')
+        #elif 'Offline' in get_server_status():
+         #   await message.channel.send(f'Server açık olmadığı için {discord_input} isteğiniz reddedildi.')
+         #   print(f'LOG-action: Server acik olmadigi icin {discord_input} istegi reddedildi.')
 
         elif discord_input == 'oyuncular' or discord_input == 'players':
             update_player_count()
@@ -175,6 +178,28 @@ async def on_message(message):
                 client_socket.send('restart'.encode())
                 await message.channel.send('Sunucu yeniden başlatılıyor.\nBu işlem yaklaşık 2 dakika sürecek.')
                 print('LOG-action: Yeniden baslatiliyor.')
+
+        elif 'mod ekle' in discord_input or 'add mod' in discord_input:
+            numbers = user_input.split()[1]
+            wsid, modid = numbers.split(':')
+            config.read(config_path)
+            mods_id = config.get('Settings', 'Mods')
+            workshop_id = config.get('Settings', 'WorkshopItems')
+            mod_list = mods_value.split(';')
+            mod_list.append(mods_id)
+            workshop_list = mods_value.split(';')
+            workshop_list.append(workshop_id)
+
+            new_mods_value = ';'.join(mod_list)  # Listeyi tekrar string haline getir
+            config.set('Settings', 'Mods', new_mods_value)
+
+            new_workshop_value = ';'.join(workshop_list)  # Listeyi tekrar string haline getir
+            config.set('Settings', 'WorkshopItems', new_workshop_value)
+
+            with open(config_path, 'w') as configfile:
+                config.write(configfile)
+
+
 
         elif direct_commands_allowed:
             client_socket.send(discord_input.encode())
