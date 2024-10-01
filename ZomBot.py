@@ -58,9 +58,9 @@ async def on_ready():
         if server_loading:
             load_percent = output_count*100/server_on_output_count
             if not bar_message:
-                bar_message = await channel.send(loading_bar(load_percent, 20) + ' %' + str(load_percent))
+                bar_message = await channel.send(loading_bar(load_percent, 20) + ' %' + str(round(load_percent, 2)))
             else:
-                await bar_message.edit(content=loading_bar(load_percent, 20) + ' %' + str(load_percent))
+                await bar_message.edit(content=loading_bar(load_percent, 20) + ' %' + str(round(load_percent, 2)))
         elif bar_message != '':
             try:
                 await bar_message.delete()
