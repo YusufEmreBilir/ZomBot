@@ -28,7 +28,7 @@ subprocess.Popen(['start', 'cmd', '/k', 'python', 'server.py'], shell=True)
 
 
 client_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-client_socket.connect((socket.gethostname(), 12345))  # Sunucuya bağlanmak için IP ve port tanımlanıyor
+client_socket.connect((socket.gethostname(), 12345))  # Sunucuya bağlanmak için IP ve port tanımlama
 print('\033[32mSunucu ile baglanti kuruldu!\033[0m')
 
 
@@ -51,7 +51,7 @@ bot = commands.Bot(command_prefix='!pz ',
 async def on_ready():
     global server_status_sent, bar_message
     channel = bot.get_channel(channel_ID)
-    print(f'\033[32m*** Discord Botu Uyandi! *** \n{bot.user} adına giris yapildi\033[0m')
+    print(f'\033[32m*** Discord Botu Uyandi! *** \n{bot.user} adina giris yapildi\033[0m')
     await channel.send('***         Bot Uyandı!***')
     await channel.send(get_server_status())
     await bot.change_presence(activity=discord.CustomActivity(name=get_server_status_without_emoji()))
