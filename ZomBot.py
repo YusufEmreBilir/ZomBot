@@ -12,7 +12,7 @@ import configparser
 
 os.system('cls')
 
-direct_commands_allowed = False
+direct_commands_allowed = True
 
 server_is_open = 'Offline'
 server_is_open_emoji = ':red_circle:'
@@ -177,7 +177,19 @@ async def on_message(message):
             else:
                 client_socket.send('restart'.encode())
                 await message.channel.send('Sunucu yeniden başlatılıyor.\nBu işlem yaklaşık 2 dakika sürecek.')
-                print('LOG-action: Yeniden baslatiliyor.')
+                print('LOG-action: Kaydediliyor ve Yeniden baslatiliyor.')
+
+        elif discord_input == 'quit' or discord_input == 'close' or discord_input == 'shutdown' or discord_input == 'kapat':
+            update_player_count()
+            await asyncio.sleep(1)
+            if player_count > 0:
+                await message.channel.send(f'Şuan bağlı {player_count} oyuncu var.\nBağlı oyuncu olduğu sürece,'
+                                           f'Admin izinleri olmadan, sunucuyu kapamak/yeniden başlatmak mümkün değil.')
+                print('LOG-action: Kapatma reddedildi, bagli oyuncular var.')
+            else:
+                client_socket.send('quit'.encode())
+                await message.channel.send('Sunucu kaydediliyor ve kapatılıyor.')
+                print('LOG-action: Sunucu kapatılıyor.')
 
         elif 'mod ekle' in discord_input or 'add mod' in discord_input:
             numbers = user_input.split()[1]
