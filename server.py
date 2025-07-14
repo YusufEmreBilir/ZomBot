@@ -4,6 +4,7 @@ import os
 from time import sleep
 import socket
 import re
+from ZomBot.config import *
 
 
 server_loading = False
@@ -15,19 +16,14 @@ server_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 server_socket.bind((socket.gethostname(), 12345))  # Localhost ve port tanımlanıyor
 server_socket.listen(5)
 
-print("Sunucu başlatıldı, istemci bekleniyor...")
+print("Sunucu başlatildi, istemci bekleniyor...")
 
 connection, address = server_socket.accept()
-print(f"Bağlantı kabul edildi: {address}")
+print(f"Bağlanti kabul edildi: {address}")
 sleep(3)
 
 
-start_server_path = 'C:\\SteamCMD\\steamapps\\common\\Project Zomboid Dedicated Server\\StartServer64.bat'
-start_server_name = 'StartServer64.bat'
-server_load_start_log = 'LoggerManager.init                  > Initializing...' #TBD
-server_on_log = '*** SERVER STARTED ****'
-server_off_log = 'Shutting down Steam Game Server'
-loading_asset_log = 'LOADING ASSETS: START'
+
 server_process = None
 
 def start_server():
@@ -114,26 +110,26 @@ def close_server():
     server_process.terminate() #güzellikten anlamıyor
 
 
+
+
+
+
 start_server()
-# Log okuma thread'i
-log_thread = threading.Thread(target=read_output, daemon=True)
-log_thread.start()
+log_thread = threading.Thread(target=read_output, daemon=True).start()  # Log okuma thread'ini başlat
 
 while True:
     sleep(1)
-    # İstemciden gelen veriyi al
-    data = connection.recv(1024).decode()
-    command = data #Malca ama içimden düzeltmek gelmiyor.
+    data = connection.recv(1024).decode()  # İstemciden gelen veriyi al
     print(f"Discord uzerinden gelen veri: {data}")
-    if command:
-        if command == 'restart':
+    if data:
+        if data == 'restart':
             restart_server()
 
-        elif command == 'close_server':
+        elif data == 'close_server':
             close_server()
 
 
         else:
-            send_command(command)
+            send_command(data)
 
-        command = ''
+        data = 0

@@ -8,6 +8,7 @@ import socket
 import asyncio
 import re
 import configparser
+from ZomBot.config import *
 
 
 os.system('cls')
@@ -16,12 +17,11 @@ direct_commands_allowed = True
 
 server_is_open = 'Offline'
 server_is_open_emoji = ':red_circle:'
-player_count = 66
+player_count = 0
 output_count = 0
-server_on_output_count = 8420 #TBD
 server_status_sent = True
 server_loading = False
-bar_message = ''
+loading_bar_message = ''
 config = configparser.ConfigParser()
 
 subprocess.Popen(['start', 'cmd', '/k', 'python', 'server.py'], shell=True)
@@ -36,9 +36,7 @@ print('\033[32mSunucu ile baglanti kuruldu!\033[0m')
 command = ''
 discord_input = ''
 
-token = 'MTI4NTUzMTEyOTkzOTQ5NzAxMQ.GW3Hf9.8nIk1dl6sElo3zhByrE8E9F8TnEucMMDC-Okcw'
-config_path = 'C:\\Users\\Yusuf Emre Bilir\\Zomboid\\Server\\servertest.ini'
-channel_ID = 1201982960333770822
+
 intents = discord.Intents.default()
 intents.message_content = True
 bot = commands.Bot(command_prefix='!pz ',
@@ -49,7 +47,7 @@ bot = commands.Bot(command_prefix='!pz ',
 
 @bot.event
 async def on_ready():
-    global server_status_sent, bar_message
+    global server_status_sent, loading_bar_message
     channel = bot.get_channel(channel_ID)
     print(f'\033[32m*** Discord Botu Uyandi! *** \n{bot.user} adina giris yapildi\033[0m')
     await channel.send('***         Bot Uyandı!***')
@@ -60,13 +58,13 @@ async def on_ready():
 
         if server_loading:
             load_percent = output_count*100/server_on_output_count
-            if not bar_message:
-                bar_message = await channel.send(loading_bar(load_percent, 20) + ' %' + str(round(load_percent, 2)))
+            if not loading_bar_message:
+                loading_bar_message = await channel.send(loading_bar(load_percent, 20) + ' %' + str(round(load_percent, 2)))
             else:
-                await bar_message.edit(content=loading_bar(load_percent, 20) + ' %' + str(round(load_percent, 2)))
-        elif bar_message != '':
+                await loading_bar_message.edit(content=loading_bar(load_percent, 20) + ' %' + str(round(load_percent, 2)))
+        elif loading_bar_message != '':
             try:
-                await bar_message.delete()
+                await loading_bar_message.delete()
             except:
                 pass
 
@@ -74,7 +72,7 @@ async def on_ready():
             await channel.send(get_server_status())
             await bot.change_presence(activity=discord.CustomActivity(name=get_server_status_without_emoji()))
             server_status_sent = True
-            bar_message = ''
+            loading_bar_message = ''
 
 
 
@@ -222,6 +220,9 @@ async def on_message(message):
             print('LOG-action: Gecersiz komut reddedildi.')
 
     discord_input = ''
+
+
+
 
 threading.Thread(target = server_feedback, daemon = True).start()
 bot.run(token)
