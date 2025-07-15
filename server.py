@@ -4,7 +4,7 @@ import os
 from time import sleep
 import socket
 import re
-from ZomBot.config import *
+from config import *
 
 
 server_loading = False

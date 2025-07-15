@@ -8,7 +8,8 @@ import socket
 import asyncio
 import re
 import configparser
-from ZomBot.config import *
+from config import *
+from token_config import token
 
 
 os.system('cls')
